@@ -1,18 +1,23 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package hardenedpass;
 
-/**
- *
- * @author Chomp3rs
- */
+import java.io.File;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 public class passwordGUI extends javax.swing.JFrame {
 
-    /**
-     * Creates new form passwordGUI
-     */
+    private char[] givenPass;
+    private String givenUser;
+    private String givenQ1;
+    private String givenQ2;
+    private String givenQ3;
+    private String givenQ4;
+    private String givenQ5;
+
     public passwordGUI() {
         initComponents();
         questionsPanel.setVisible(false);
@@ -179,8 +184,42 @@ public class passwordGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
-        loginPanel.setVisible(false);
-        questionsPanel.setVisible(true);
+        if (!usernameTextField.getText().equals("") && passwordTextField.getPassword().length != 0) {
+            //do initialization here if it is new user.
+            //don't ask for next questions if it is new user
+            givenPass = passwordTextField.getPassword();
+            givenUser = usernameTextField.getText();
+
+            //check to see if it is a new user
+            //hash(username_history).txt
+            //hash(username_instruction).txt
+            try {
+                MessageDigest md1 = MessageDigest.getInstance("MD5");
+                MessageDigest md2 = MessageDigest.getInstance("MD5");
+                String histFileName = givenUser + "_history";
+                String instructionFileName = givenUser + "_instruction";
+                
+                byte[] messageDigest1 = md1.digest(histFileName.getBytes());
+                byte[] messageDigest2 = md2.digest(instructionFileName.getBytes());
+                BigInteger numberHist = new BigInteger(1, messageDigest1);
+                BigInteger numberInstruct = new BigInteger(1, messageDigest2);
+                String histFileHash = numberHist.toString(16);
+                String instructionFileHash = numberInstruct.toString(16);
+                File histFile = new File(histFileHash);
+                File instructionFile = new File(instructionFileHash);
+                
+                if(histFile.exists() && instructionFile.exists()){  
+                    loginPanel.setVisible(false);
+                    questionsPanel.setVisible(true);
+                }else {
+                    //do the initialization
+                    
+                }
+            } catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(passwordGUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
     }//GEN-LAST:event_loginButtonActionPerformed
 
     /**
